@@ -261,13 +261,14 @@ Partial Public Class clsXMLSettings
     Private _moviesets As New List(Of String)
     Private _moviesetscraperplot As Boolean
     Private _moviesetscrapertitle As Boolean
+    Private _moviesetsorttokensisempty As Boolean
     Private _movieskiplessthan As Integer
     Private _movieskipstackedsizecheck As Boolean
     Private _moviesortbeforescan As Boolean
     Private _moviesorttokens As List(Of String)
     Private _moviesetsorttokens As List(Of String)
     Private _moviesorttokensisempty As Boolean
-    Private _moviesetsorttokensisempty As Boolean
+    Private _moviestacking As List(Of regexp)
     Private _moviethemeenable As Boolean
     Private _moviethemeoverwrite As Boolean
     Private _movietrailerdefaultsearch As String
@@ -2548,6 +2549,15 @@ Partial Public Class clsXMLSettings
         End Get
         Set(ByVal value As Boolean)
             Me._moviesetmissingposter = value
+        End Set
+    End Property
+
+    Public Property MovieStacking() As List(Of regexp)
+        Get
+            Return Me._moviestacking
+        End Get
+        Set(ByVal value As List(Of regexp))
+            Me._moviestacking = value
         End Set
     End Property
 

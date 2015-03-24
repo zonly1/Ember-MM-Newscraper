@@ -646,6 +646,7 @@ Public Class Enums
         MovieSortTokens = 14
         MovieSetSortTokens = 15
         TVSortTokens = 16
+        MovieStacking = 17
     End Enum
 
     Public Enum DelType As Integer

@@ -784,13 +784,13 @@
   <string id="783">Plot Summary:</string>
   <string id="784">Media Sources Editor</string>
   <string id="785">Audio &amp; Video Codec Mapping</string>
-  <string id="786"></string>
+  <string id="786">Are you sure you want to reset to the default list of movie stacking regex?</string>
   <string id="787">Get your API Key from fanart.tv</string>
   <string id="788">Fanart.tv</string>
   <string id="789">Fanart.tv Personal API Key</string>
   <string id="790">These settings are specific to this module.{0}Please refer to the global settings for more options.</string>
   <string id="791">Scraper Fields - Scraper specific</string>
-  <string id="792"></string>
+  <string id="792">Movie Stacking Regex</string>
   <string id="793">&amp;Versions...</string>
   <string id="794">Search Results</string>
   <string id="795">Interface</string>

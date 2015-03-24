@@ -996,7 +996,7 @@ Public Class dlgExportMovies
         If StringUtils.IsStacked(Path.GetFileNameWithoutExtension(spath), True) OrElse FileUtils.Common.isVideoTS(spath) OrElse FileUtils.Common.isBDRip(spath) Then
             Try
                 Dim sExt As String = Path.GetExtension(spath).ToLower
-                Dim oFile As String = StringUtils.CleanStackingMarkers(spath, False)
+                Dim oFile As String = StringUtils.CleanStackingMarkers(spath)
                 Dim sFile As New List(Of String)
                 Dim bIsVTS As Boolean = False
 

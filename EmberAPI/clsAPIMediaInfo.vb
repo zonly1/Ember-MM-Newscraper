@@ -251,9 +251,9 @@ Public Class MediaInfo
 
                 'cocotus 20140118 For more accurate metadata scanning of BLURAY/DVD images use improved mediainfo scanning (ScanMI-function) -> don't hop in this branch!! 
                 '  ElseIf StringUtils.IsStacked(Path.GetFileNameWithoutExtension(sPath), True) OrElse FileUtils.Common.isVideoTS(sPath) OrElse FileUtils.Common.isBDRip(sPath) Then
-            ElseIf StringUtils.IsStacked(Path.GetFileNameWithoutExtension(sPath), True) Then
+            ElseIf StringUtils.IsStacked(sPath, True) Then
                 Try
-                    Dim oFile As String = StringUtils.CleanStackingMarkers(sPath, False)
+                    Dim oFile As String = StringUtils.CleanStackingMarkers(sPath)
                     Dim sFile As New List(Of String)
                     Dim bIsVTS As Boolean = False
 
@@ -290,7 +290,7 @@ Public Class MediaInfo
                         'make sure the file is actually part of the stack
                         'handles movie.cd1.ext, movie.cd2.ext and movie.extras.ext
                         'disregards movie.extras.ext in this case
-                        If bIsVTS OrElse (oFile = StringUtils.CleanStackingMarkers(File, False)) Then
+                        If bIsVTS OrElse (oFile = StringUtils.CleanStackingMarkers(File)) Then
                             tInfo = ScanMI(File)
 
                             tVideo = NFO.GetBestVideo(tInfo)
@@ -324,7 +324,7 @@ Public Class MediaInfo
 
                     fiInfo = fiOut
                 Catch ex As Exception
-                    logger.Error(New StackFrame().GetMethod().Name,ex)
+                    logger.Error(New StackFrame().GetMethod().Name, ex)
                 End Try
             Else
                 fiInfo = ScanMI(sPath)

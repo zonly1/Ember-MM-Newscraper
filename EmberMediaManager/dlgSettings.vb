@@ -39,6 +39,7 @@ Public Class dlgSettings
     Private MovieMeta As New List(Of Settings.MetadataPerType)
     Private MovieGeneralMediaListSorting As New List(Of Settings.ListSorting)
     Private MovieSetGeneralMediaListSorting As New List(Of Settings.ListSorting)
+    Private MovieStacking As New List(Of Settings.regexp)
     Private TVGeneralEpisodeListSorting As New List(Of Settings.ListSorting)
     Private TVGeneralSeasonListSorting As New List(Of Settings.ListSorting)
     Private TVGeneralShowListSorting As New List(Of Settings.ListSorting)
@@ -723,6 +724,23 @@ Public Class dlgSettings
         Me.txtTVShowFilter.Focus()
     End Sub
 
+    Private Sub btnMovieSourcesRegexMovieStackingAdd_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnMovieSourcesRegexMovieStackingAdd.Click
+        If String.IsNullOrEmpty(Me.btnMovieSourcesRegexMovieStackingAdd.Tag.ToString) Then
+            Dim lID = (From lRegex As Settings.regexp In Me.MovieStacking Select lRegex.ID).Max
+            Me.MovieStacking.Add(New Settings.regexp With {.ID = Convert.ToInt32(lID) + 1, _
+                                                            .Regexp = Me.txtMovieSourcesRegexMovieStackingRegex.Text})
+        Else
+            Dim selRex = From lRegex As Settings.regexp In Me.MovieStacking Where lRegex.ID = Convert.ToInt32(Me.btnMovieSourcesRegexMovieStackingAdd.Tag)
+            If selRex.Count > 0 Then
+                selRex(0).Regexp = Me.txtmovieSourcesRegexmoviestackingRegex.Text
+            End If
+        End If
+
+        Me.ClearMovieStacking()
+        Me.SetApplyButton(True)
+        Me.LoadMovieStacking()
+    End Sub
+
     Private Sub btnTVSourcesRegexTVShowMatchingAdd_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnTVSourcesRegexTVShowMatchingAdd.Click
         If String.IsNullOrEmpty(Me.btnTVSourcesRegexTVShowMatchingAdd.Tag.ToString) Then
             Dim lID = (From lRegex As Settings.regexp In Me.TVShowMatching Select lRegex.ID).Max
@@ -825,6 +843,10 @@ Public Class dlgSettings
         Me.Close()
     End Sub
 
+    Private Sub btnMovieSourcesRegexMovieStackingClear_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnMovieSourcesRegexMovieStackingClear.Click
+        Me.ClearMovieStacking()
+    End Sub
+
     Private Sub btnTVSourcesRegexTVShowMatchingClear_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnTVSourcesRegexTVShowMatchingClear.Click
         Me.ClearTVShowMatching()
     End Sub
@@ -909,6 +931,10 @@ Public Class dlgSettings
                 End If
             Next
         End Using
+    End Sub
+
+    Private Sub btnMovieSourcesRegexMovieStackingEdit_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnMovieSourcesRegexMovieStackingEdit.Click
+        If Me.lvMovieSourcesRegexMovieStacking.SelectedItems.Count > 0 Then Me.EditMovieStacking(lvMovieSourcesRegexMovieStacking.SelectedItems(0))
     End Sub
 
     Private Sub btnTVSourcesRegexTVShowMatchingEdit_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnTVSourcesRegexTVShowMatchingEdit.Click
@@ -1051,6 +1077,60 @@ Public Class dlgSettings
         Me.SaveSettings(False)
         RemoveScraperPanels()
         Me.Close()
+    End Sub
+
+    Private Sub btnMovieSourcesRegexMovieStackingUp_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnMovieSourcesRegexMovieStackingUp.Click
+        Try
+            If Me.lvMovieSourcesRegexMovieStacking.Items.Count > 0 AndAlso Me.lvMovieSourcesRegexMovieStacking.SelectedItems.Count > 0 AndAlso Not Me.lvMovieSourcesRegexMovieStacking.SelectedItems(0).Index = 0 Then
+                Dim selItem As Settings.regexp = Me.MovieStacking.FirstOrDefault(Function(r) r.ID = Convert.ToInt32(Me.lvMovieSourcesRegexMovieStacking.SelectedItems(0).Text))
+
+                If selItem IsNot Nothing Then
+                    Me.lvMovieSourcesRegexMovieStacking.SuspendLayout()
+                    Dim iIndex As Integer = Me.MovieStacking.IndexOf(selItem)
+                    Dim selIndex As Integer = Me.lvMovieSourcesRegexMovieStacking.SelectedIndices(0)
+                    Me.MovieStacking.Remove(selItem)
+                    Me.MovieStacking.Insert(iIndex - 1, selItem)
+
+                    Me.RenumberMovieStacking()
+                    Me.LoadMovieStacking()
+
+                    Me.lvMovieSourcesRegexMovieStacking.Items(selIndex - 1).Selected = True
+                    Me.lvMovieSourcesRegexMovieStacking.ResumeLayout()
+                End If
+
+                Me.SetApplyButton(True)
+                Me.lvMovieSourcesRegexMovieStacking.Focus()
+            End If
+        Catch ex As Exception
+            logger.Error(New StackFrame().GetMethod().Name, ex)
+        End Try
+    End Sub
+
+    Private Sub btnMovieSourcesRegexMovieStackingDown_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnMovieSourcesRegexMovieStackingDown.Click
+        Try
+            If Me.lvMovieSourcesRegexMovieStacking.Items.Count > 0 AndAlso Me.lvMovieSourcesRegexMovieStacking.SelectedItems.Count > 0 AndAlso Me.lvMovieSourcesRegexMovieStacking.SelectedItems(0).Index < (Me.lvMovieSourcesRegexMovieStacking.Items.Count - 1) Then
+                Dim selItem As Settings.regexp = Me.MovieStacking.FirstOrDefault(Function(r) r.ID = Convert.ToInt32(Me.lvMovieSourcesRegexMovieStacking.SelectedItems(0).Text))
+
+                If selItem IsNot Nothing Then
+                    Me.lvMovieSourcesRegexMovieStacking.SuspendLayout()
+                    Dim iIndex As Integer = Me.MovieStacking.IndexOf(selItem)
+                    Dim selIndex As Integer = Me.lvMovieSourcesRegexMovieStacking.SelectedIndices(0)
+                    Me.MovieStacking.Remove(selItem)
+                    Me.MovieStacking.Insert(iIndex + 1, selItem)
+
+                    Me.RenumberMovieStacking()
+                    Me.LoadMovieStacking()
+
+                    Me.lvMovieSourcesRegexMovieStacking.Items(selIndex + 1).Selected = True
+                    Me.lvMovieSourcesRegexMovieStacking.ResumeLayout()
+                End If
+
+                Me.SetApplyButton(True)
+                Me.lvMovieSourcesRegexMovieStacking.Focus()
+            End If
+        Catch ex As Exception
+            logger.Error(New StackFrame().GetMethod().Name, ex)
+        End Try
     End Sub
 
     Private Sub btnTVSourcesRegexTVShowMatchingUp_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnTVSourcesRegexTVShowMatchingUp.Click
@@ -1565,6 +1645,27 @@ Public Class dlgSettings
         End If
     End Sub
 
+    Private Sub btnMovieSourcesRegexMovieStackingGet_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnMovieSourcesRegexMovieStackingGet.Click
+        'Using dd As New dlgMovieRegExProfiles
+        '    If dd.ShowDialog() = Windows.Forms.DialogResult.OK Then
+        '        Me.MovieStacking.Clear()
+        '        Me.MovieStacking.AddRange(dd.ShowRegex)
+        '        Me.LoadMovieStacking()
+        '        Me.SetApplyButton(True)
+        '    End If
+        'End Using
+    End Sub
+
+    Private Sub btnMovieSourcesRegexMovieStackingReset_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnMovieSourcesRegexMovieStackingReset.Click
+        If MessageBox.Show(Master.eLang.GetString(786, "Are you sure you want to reset to the default list of movie stacking regex?"), Master.eLang.GetString(104, "Are You Sure?"), MessageBoxButtons.YesNo, MessageBoxIcon.Question) = Windows.Forms.DialogResult.Yes Then
+            Master.eSettings.SetDefaultsForLists(Enums.DefaultType.MovieStacking, True)
+            Me.MovieStacking.Clear()
+            Me.MovieStacking.AddRange(Master.eSettings.MovieStacking)
+            Me.LoadMovieStacking()
+            Me.SetApplyButton(True)
+        End If
+    End Sub
+
     Private Sub btnTVSourcesRegexTVShowMatchingGet_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnTVSourcesRegexTVShowMatchingGet.Click
         Using dd As New dlgTVRegExProfiles
             If dd.ShowDialog() = Windows.Forms.DialogResult.OK Then
@@ -1661,6 +1762,10 @@ Public Class dlgSettings
 
     Private Sub btnTVShowFilterRemove_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnTVShowFilterRemove.Click
         Me.RemoveTVShowFilter()
+    End Sub
+
+    Private Sub btnMovieSourcesRegexMovieStackingRemove_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnMovieSourcesRegexMovieStackingRemove.Click
+        Me.RemoveMovieStacking()
     End Sub
 
     Private Sub btnTVSourcesRegexTVShowMatchingRemove_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnTVSourcesRegexTVShowMatchingRemove.Click
@@ -3380,6 +3485,13 @@ Public Class dlgSettings
         Me.SetApplyButton(True)
     End Sub
 
+    Private Sub ClearMovieStacking()
+        Me.btnMovieSourcesRegexMovieStackingAdd.Text = Master.eLang.GetString(115, "Add Regex")
+        Me.btnMovieSourcesRegexMovieStackingAdd.Tag = String.Empty
+        Me.btnMovieSourcesRegexMovieStackingAdd.Enabled = False
+        Me.txtMovieSourcesRegexMovieStackingRegex.Text = String.Empty
+    End Sub
+
     Private Sub ClearTVShowMatching()
         Me.btnTVSourcesRegexTVShowMatchingAdd.Text = Master.eLang.GetString(115, "Add Regex")
         Me.btnTVSourcesRegexTVShowMatchingAdd.Tag = String.Empty
@@ -3391,6 +3503,12 @@ Public Class dlgSettings
 
     Private Sub dlgSettings_Shown(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Shown
         Me.Activate()
+    End Sub
+
+    Private Sub EditMovieStacking(ByVal lItem As ListViewItem)
+        Me.btnMovieSourcesRegexMovieStackingAdd.Text = Master.eLang.GetString(124, "Update Regex")
+        Me.btnMovieSourcesRegexMovieStackingAdd.Tag = lItem.Text
+        Me.txtMovieSourcesRegexMovieStackingRegex.Text = lItem.SubItems(1).Text.ToString
     End Sub
 
     Private Sub EditTVShowMatching(ByVal lItem As ListViewItem)
@@ -3883,6 +4001,9 @@ Public Class dlgSettings
             Me.MovieSetGeneralMediaListSorting.AddRange(.MovieSetGeneralMediaListSorting)
             Me.LoadMovieSetGeneralMediaListSorting()
 
+            Me.MovieStacking.AddRange(.MovieStacking)
+            Me.LoadMovieStacking()
+
             Me.TVGeneralEpisodeListSorting.AddRange(.TVGeneralEpisodeListSorting)
             Me.LoadTVGeneralEpisodeListSorting()
 
@@ -4201,7 +4322,7 @@ Public Class dlgSettings
         'get optimal panel size
         Dim pWidth As Integer = CInt(Me.Width)
         Dim pHeight As Integer = CInt(Me.Height)
-        If My.Computer.Screen.WorkingArea.Width < 1120 Then
+        If My.Computer.Screen.WorkingArea.Width < 1150 Then
             pWidth = CInt(My.Computer.Screen.WorkingArea.Width)
         End If
         If My.Computer.Screen.WorkingArea.Height < 900 Then
@@ -4388,6 +4509,16 @@ Public Class dlgSettings
             lvItem.SubItems.Add(Master.eLang.GetString(rColumn.LabelID, rColumn.LabelText))
             lvItem.SubItems.Add(If(rColumn.Hide, Master.eLang.GetString(300, "Yes"), Master.eLang.GetString(720, "No")))
             Me.lvMovieSetGeneralMediaListSorting.Items.Add(lvItem)
+        Next
+    End Sub
+
+    Private Sub LoadMovieStacking()
+        Dim lvItem As ListViewItem
+        lvMovieSourcesRegexMovieStacking.Items.Clear()
+        For Each rStack As Settings.regexp In Me.MovieStacking
+            lvItem = New ListViewItem(rStack.ID.ToString)
+            lvItem.SubItems.Add(rStack.Regexp)
+            Me.lvMovieSourcesRegexMovieStacking.Items.Add(lvItem)
         Next
     End Sub
 
@@ -4793,6 +4924,18 @@ Public Class dlgSettings
         If e.KeyCode = Keys.Delete Then Me.RemoveMovieSource()
     End Sub
 
+    Private Sub lvMovieSourcesRegexMovieStacking_DoubleClick(ByVal sender As Object, ByVal e As System.EventArgs) Handles lvMovieSourcesRegexMovieStacking.DoubleClick
+        If Me.lvMovieSourcesRegexMovieStacking.SelectedItems.Count > 0 Then Me.EditMovieStacking(lvMovieSourcesRegexMovieStacking.SelectedItems(0))
+    End Sub
+
+    Private Sub lvMovieSourcesRegexMovieStacking_KeyDown(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyEventArgs) Handles lvMovieSourcesRegexMovieStacking.KeyDown
+        If e.KeyCode = Keys.Delete Then Me.RemoveMovieStacking()
+    End Sub
+
+    Private Sub lvMovieSourcesRegexMovieStacking_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles lvMovieSourcesRegexMovieStacking.SelectedIndexChanged
+        If Not String.IsNullOrEmpty(Me.btnMovieSourcesRegexMovieStackingAdd.Tag.ToString) Then Me.ClearMovieStacking()
+    End Sub
+
     Private Sub lvTVSourcesRegexTVShowMatching_DoubleClick(ByVal sender As Object, ByVal e As System.EventArgs) Handles lvTVSourcesRegexTVShowMatching.DoubleClick
         If Me.lvTVSourcesRegexTVShowMatching.SelectedItems.Count > 0 Then Me.EditTVShowMatching(lvTVSourcesRegexTVShowMatching.SelectedItems(0))
     End Sub
@@ -5035,6 +5178,19 @@ Public Class dlgSettings
         End If
     End Sub
 
+    Private Sub RemoveMovieStacking()
+        Dim ID As Integer
+        For Each lItem As ListViewItem In lvMovieSourcesRegexMovieStacking.SelectedItems
+            ID = Convert.ToInt32(lItem.Text)
+            Dim selRex = From lRegex As Settings.regexp In Me.MovieStacking Where lRegex.ID = ID
+            If selRex.Count > 0 Then
+                Me.MovieStacking.Remove(selRex(0))
+                Me.SetApplyButton(True)
+            End If
+        Next
+        Me.LoadMovieStacking()
+    End Sub
+
     Private Sub RemoveTVShowMatching()
         Dim ID As Integer
         For Each lItem As ListViewItem In lvTVSourcesRegexTVShowMatching.SelectedItems
@@ -5132,6 +5288,12 @@ Public Class dlgSettings
                 Me.sResult.NeedsUpdate = True
             End If
         End If
+    End Sub
+
+    Private Sub RenumberMovieStacking()
+        For i As Integer = 0 To Me.MovieStacking.Count - 1
+            Me.MovieStacking(i).ID = i
+        Next
     End Sub
 
     Private Sub RenumberTVShowMatching()
@@ -5421,6 +5583,8 @@ Public Class dlgSettings
             .MovieSetSortTokens.Clear()
             .MovieSetSortTokens.AddRange(lstMovieSetSortTokens.Items.OfType(Of String).ToList)
             If .MovieSetSortTokens.Count <= 0 Then .MovieSetSortTokensIsEmpty = True
+            .MovieStacking.Clear()
+            .MovieStacking.AddRange(Me.MovieStacking)
             .MovieThemeEnable = Me.chkMovieThemeEnable.Checked
             .MovieThemeOverwrite = Me.chkMovieThemeOverwrite.Checked
             .MovieTrailerDefaultSearch = Me.txtMovieTrailerDefaultSearch.Text
@@ -6597,6 +6761,11 @@ Public Class dlgSettings
         Me.btnMovieSourceAdd.Text = Master.eLang.GetString(407, "Add Source")
         Me.btnMovieSourceEdit.Text = Master.eLang.GetString(535, "Edit Source")
         Me.btnMovieSourceRemove.Text = Master.eLang.GetString(30, "Remove")
+        Me.btnMovieSourcesRegexMovieStackingAdd.Tag = String.Empty
+        Me.btnMovieSourcesRegexMovieStackingAdd.Text = Master.eLang.GetString(690, "Edit Regex")
+        Me.btnMovieSourcesRegexMovieStackingClear.Text = Master.eLang.GetString(123, "Clear")
+        Me.btnMovieSourcesRegexMovieStackingEdit.Text = Master.eLang.GetString(690, "Edit Regex")
+        Me.btnMovieSourcesRegexMovieStackingRemove.Text = Master.eLang.GetString(30, "Remove")
         Me.btnOK.Text = Master.eLang.GetString(179, "OK")
         Me.btnRemTVSource.Text = Master.eLang.GetString(30, "Remove")
         Me.btnTVGeneralLangFetch.Text = Master.eLang.GetString(742, "Fetch Available Languages")
@@ -6710,6 +6879,7 @@ Public Class dlgSettings
         Me.gbMovieSetMSAAPath.Text = Master.eLang.GetString(986, "Movieset Artwork Folder")
         Me.gbMovieSetScraperTitleRenamerOpts.Text = Master.eLang.GetString(1279, "Title Renamer")
         Me.gbMovieSourcesFileNamingXBMCTvTunesOpts.Text = Master.eLang.GetString(1076, "Theme Settings")
+        Me.gbMovieSourcesRegexMovieStacking.Text = Master.eLang.GetString(792, "Movie Stacking Regex")
         Me.gbProxyCredsOpts.Text = Master.eLang.GetString(676, "Credentials")
         Me.gbProxyOpts.Text = Master.eLang.GetString(672, "Proxy")
         Me.gbSettingsHelp.Text = String.Concat("     ", Master.eLang.GetString(458, "Help"))
@@ -6739,6 +6909,7 @@ Public Class dlgSettings
         Me.lblMovieScraperDurationRuntimeFormat.Text = String.Format(Master.eLang.GetString(732, "<h>=Hours{0}<m>=Minutes{0}<s>=Seconds"), Environment.NewLine)
         Me.lblMovieSkipLessThan.Text = Master.eLang.GetString(540, "Skip files smaller than:")
         Me.lblMovieSkipLessThanMB.Text = Master.eLang.GetString(539, "MB")
+        Me.lblMovieSourcesRegexMovieStackingRegex.Text = Master.eLang.GetString(699, "Regex")
         Me.lblMovieTrailerDefaultSearch.Text = Master.eLang.GetString(1172, "Default Search Parameter:")
         Me.lblMovieTrailerMinQual.Text = Master.eLang.GetString(1027, "Minimum Quality:")
         Me.lblMovieTrailerPrefQual.Text = Master.eLang.GetString(800, "Preferred Quality:")
@@ -7187,6 +7358,10 @@ Public Class dlgSettings
         Me.SetApplyButton(True)
     End Sub
 
+    Private Sub txtMovieSourcesRegexMovieStackingRegex_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles txtMovieSourcesRegexMovieStackingRegex.TextChanged
+        Me.ValidateMovieStacking()
+    End Sub
+
     Private Sub txtTVSourcesRegexTVShowMatchingRegex_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles txtTVSourcesRegexTVShowMatchingRegex.TextChanged
         Me.ValidateTVShowMatching()
     End Sub
@@ -7271,6 +7446,14 @@ Public Class dlgSettings
 
     Private Sub txtMovieYAMJWatchedFolder_TextChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles txtMovieYAMJWatchedFolder.TextChanged
         Me.SetApplyButton(True)
+    End Sub
+
+    Private Sub ValidateMovieStacking()
+        If Not String.IsNullOrEmpty(Me.txtMovieSourcesRegexMovieStackingRegex.Text) Then
+            Me.btnMovieSourcesRegexMovieStackingAdd.Enabled = True
+        Else
+            Me.btnMovieSourcesRegexMovieStackingAdd.Enabled = False
+        End If
     End Sub
 
     Private Sub ValidateTVShowMatching()

@@ -188,14 +188,19 @@ Public Class StringUtils
         'Don't do anything if DisableMultiPartMedia is True
         If clsAdvancedSettings.GetBooleanSetting("DisableMultiPartMedia", False) Then Return sPath
         If String.IsNullOrEmpty(sPath) Then Return String.Empty
-        Dim pattern As String = clsAdvancedSettings.GetSetting("DeleteStackMarkers", "[\s_\-\.]+\(?(cd|dvd|p(?:ar)?t|dis[ck])+[_\-\.]?[0-9]+\)?")
-        Dim replacement = If(Asterisk, "*", " ")
-        Dim sReturn As String = Regex.Replace(sPath, pattern, replacement, RegexOptions.IgnoreCase)
-        If Not sReturn.Trim = sPath.Trim Then
-            'Replace any double white space by a single white space
-            sReturn = Regex.Replace(sReturn, "\s\s(\s+)?", " ").Trim
-        End If
-        Return sReturn.Trim
+
+        Dim sReturn As String = String.Empty
+
+        For Each sPattern As Settings.regexp In Master.eSettings.MovieStacking
+            If Regex.IsMatch(sPath, sPattern.Regexp, RegexOptions.IgnoreCase) Then
+                Dim test As Match = Regex.Match(sPath, sPattern.Regexp, RegexOptions.IgnoreCase)
+                Dim tes2 As String = test.Groups(2).Value
+                sReturn = sPath.Replace(Regex.Match(sPath, sPattern.Regexp, RegexOptions.IgnoreCase).Groups(2).Value, String.Empty).Trim
+                Return Regex.Replace(sReturn, "\s\s(\s+)?", " ").Trim
+            End If
+        Next
+
+        Return sPath
     End Function
     ''' <summary>
     ''' Removes all URLs and HTML tags
@@ -705,18 +710,19 @@ Public Class StringUtils
     Public Shared Function IsStacked(ByVal sName As String, Optional ByVal VTS As Boolean = False) As Boolean
         If String.IsNullOrEmpty(sName) Then Return False
         If clsAdvancedSettings.GetBooleanSetting("DisableMultiPartMedia", False) Then Return False
-        Dim sCheckStackMarkers As String = clsAdvancedSettings.GetSetting("CheckStackMarkers", "[\s_\-\.]+\(?(cd|dvd|p(?:ar)?t|dis[ck])+[_\-\.]?[0-9]+\)?")
+
         Try
-            Dim bReturn As Boolean = Regex.IsMatch(sName, sCheckStackMarkers, RegexOptions.IgnoreCase)
-            If VTS And Not bReturn Then
-                bReturn = Regex.IsMatch(sName, "^vts_[0-9]+_[0-9]+", RegexOptions.IgnoreCase)
-            End If
-            Return bReturn
+            For Each sPattern As Settings.regexp In Master.eSettings.MovieStacking
+                If Regex.IsMatch(sName, sPattern.Regexp, RegexOptions.IgnoreCase) Then
+                    Return True
+                ElseIf VTS AndAlso Regex.IsMatch(sName, "^vts_[0-9]+_[0-9]+", RegexOptions.IgnoreCase) Then
+                    Return True
+                End If
+            Next
         Catch ex As Exception
             logger.Error(New StackFrame().GetMethod().Name & Convert.ToChar(Windows.Forms.Keys.Tab) & "Input <" & sName & "><" & VTS & "> generated an error message", ex)
         End Try
 
-        'If we get here, something went wrong.
         Return False
     End Function
     ''' <summary>

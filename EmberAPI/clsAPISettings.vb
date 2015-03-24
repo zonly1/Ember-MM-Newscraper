@@ -968,6 +968,15 @@ Public Class Settings
         End Set
     End Property
 
+    Public Property MovieStacking() As List(Of regexp)
+        Get
+            Return Settings._XMLSettings.MovieStacking
+        End Get
+        Set(ByVal value As List(Of regexp))
+            Settings._XMLSettings.MovieStacking = value
+        End Set
+    End Property
+
     Public Property MovieFilterCustom() As List(Of String)
         Get
             Return Settings._XMLSettings.MovieFilterCustom
@@ -5991,6 +6000,7 @@ Public Class Settings
         Me.MovieSetPosterResize = False
         Me.MovieSetPosterWidth = 0
         Me.MovieSets = New List(Of String)
+        Me.MovieSetSortTokensIsEmpty = False
         Me.MovieSetScraperPlot = True
         Me.MovieSetScraperTitle = True
         Me.MovieSkipLessThan = 0
@@ -5999,7 +6009,7 @@ Public Class Settings
         Me.MovieSortTokens = New List(Of String)
         Me.MovieSetSortTokens = New List(Of String)
         Me.MovieSortTokensIsEmpty = False
-        Me.MovieSetSortTokensIsEmpty = False
+        Me.MovieStacking = New List(Of regexp)
         Me.MovieThemeEnable = True
         Me.MovieThemeOverwrite = True
         Me.MovieTrailerDefaultSearch = "trailer"
@@ -6323,6 +6333,13 @@ Public Class Settings
         If (Type = Enums.DefaultType.All OrElse Type = Enums.DefaultType.ValidThemeExts) AndAlso (Force OrElse Master.eSettings.FileSystemValidThemeExts.Count <= 0) Then
             Master.eSettings.FileSystemValidThemeExts.Clear()
             Master.eSettings.FileSystemValidThemeExts.AddRange(".flac,.m4a,.mp3,.wav,.wma".Split(","c))
+        End If
+
+        If (Type = Enums.DefaultType.All OrElse Type = Enums.DefaultType.MovieStacking) AndAlso (Force OrElse Master.eSettings.MovieStacking.Count <= 0) Then
+            Master.eSettings.MovieStacking.Clear()
+            Master.eSettings.MovieStacking.Add(New regexp With {.ID = 0, .byDate = False, .defaultSeason = -1, .Regexp = "(.*?)([ _.-]*(?:cd|dvd|p(?:(?:ar)?t)|dis[ck]|d)[ _.-]*[0-9]+)(.*?)(\.[^.]+)$"})
+            Master.eSettings.MovieStacking.Add(New regexp With {.ID = 1, .byDate = False, .defaultSeason = -1, .Regexp = "(.*?)([ _.-]*(?:cd|dvd|p(?:(?:ar)?t)|dis[ck]|d)[ _.-]*[a-d])(.*?)(\.[^.]+)$"})
+            'Master.eSettings.MovieStacking.Add(New regexp With {.ID = 2, .byDate = False, .defaultSeason = -1, .Regexp = "(.*?)([ ._-]*[a-d])(.*?)(\.[^.]+)$"})
         End If
 
         If (Type = Enums.DefaultType.All OrElse Type = Enums.DefaultType.TVShowMatching) AndAlso (Force OrElse Master.eSettings.TVShowMatching.Count <= 0) Then
