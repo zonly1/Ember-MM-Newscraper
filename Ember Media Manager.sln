@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "EmberMediaManager", "EmberMediaManager\EmberMediaManager.vbproj", "{9B57D3AB-AF12-4012-B945-284C2448DC81}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -55,8 +55,6 @@ EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "generic.EmberCore.Notifications", "Addons\generic.EmberCore.Notifications\generic.EmberCore.Notifications.vbproj", "{2A08A524-88DA-432F-92E6-8DC63C5376DA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WatTmdb", "WatTmdb\WatTmdb.csproj", "{EFC11645-FAB4-4C30-A498-29F5ECDF77E8}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RottenTomatoesAPI", "RottenTomatoesAPI\RottenTomatoesAPI.csproj", "{8DAFAF56-AD78-4B47-866F-E8179511AF5B}"
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "scraper.Image.FanartTV", "Addons\scraper.FanartTV.Poster\scraper.Image.FanartTV.vbproj", "{A5277330-A443-46AB-A058-016A3B6AF8AC}"
 EndProject
@@ -117,6 +115,8 @@ EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "generic.EmberCore.MediaListEditor", "Addons\generic.EmberCore.FilterEditor\generic.EmberCore.MediaListEditor.vbproj", "{34933AD1-8691-44B9-BDB4-4BF022C34552}"
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "scraper.Image.TVDB", "Addons\scraper.Image.TVDB\scraper.Image.TVDB.vbproj", "{D9441890-33EF-48DF-BCB9-BAC4FD749F89}"
+EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "scraper.Data.RottenTomatoes", "Addons\scraper.Data.RottenTomatoes\scraper.Data.RottenTomatoes.vbproj", "{36067C3E-5023-4304-B435-9F136CC7F00C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -194,14 +194,6 @@ Global
 		{EFC11645-FAB4-4C30-A498-29F5ECDF77E8}.Release|x64.Build.0 = Release|x64
 		{EFC11645-FAB4-4C30-A498-29F5ECDF77E8}.Release|x86.ActiveCfg = Release|x86
 		{EFC11645-FAB4-4C30-A498-29F5ECDF77E8}.Release|x86.Build.0 = Release|x86
-		{8DAFAF56-AD78-4B47-866F-E8179511AF5B}.Debug|x64.ActiveCfg = Debug|x64
-		{8DAFAF56-AD78-4B47-866F-E8179511AF5B}.Debug|x64.Build.0 = Debug|x64
-		{8DAFAF56-AD78-4B47-866F-E8179511AF5B}.Debug|x86.ActiveCfg = Debug|x86
-		{8DAFAF56-AD78-4B47-866F-E8179511AF5B}.Debug|x86.Build.0 = Debug|x86
-		{8DAFAF56-AD78-4B47-866F-E8179511AF5B}.Release|x64.ActiveCfg = Release|x64
-		{8DAFAF56-AD78-4B47-866F-E8179511AF5B}.Release|x64.Build.0 = Release|x64
-		{8DAFAF56-AD78-4B47-866F-E8179511AF5B}.Release|x86.ActiveCfg = Release|x86
-		{8DAFAF56-AD78-4B47-866F-E8179511AF5B}.Release|x86.Build.0 = Release|x86
 		{A5277330-A443-46AB-A058-016A3B6AF8AC}.Debug|x64.ActiveCfg = Debug|x64
 		{A5277330-A443-46AB-A058-016A3B6AF8AC}.Debug|x64.Build.0 = Debug|x64
 		{A5277330-A443-46AB-A058-016A3B6AF8AC}.Debug|x86.ActiveCfg = Debug|x86
@@ -425,6 +417,14 @@ Global
 		{D9441890-33EF-48DF-BCB9-BAC4FD749F89}.Release|x64.Build.0 = Release|x64
 		{D9441890-33EF-48DF-BCB9-BAC4FD749F89}.Release|x86.ActiveCfg = Release|x86
 		{D9441890-33EF-48DF-BCB9-BAC4FD749F89}.Release|x86.Build.0 = Release|x86
+		{36067C3E-5023-4304-B435-9F136CC7F00C}.Debug|x64.ActiveCfg = Debug|x64
+		{36067C3E-5023-4304-B435-9F136CC7F00C}.Debug|x64.Build.0 = Debug|x64
+		{36067C3E-5023-4304-B435-9F136CC7F00C}.Debug|x86.ActiveCfg = Debug|x86
+		{36067C3E-5023-4304-B435-9F136CC7F00C}.Debug|x86.Build.0 = Debug|x86
+		{36067C3E-5023-4304-B435-9F136CC7F00C}.Release|x64.ActiveCfg = Release|x64
+		{36067C3E-5023-4304-B435-9F136CC7F00C}.Release|x64.Build.0 = Release|x64
+		{36067C3E-5023-4304-B435-9F136CC7F00C}.Release|x86.ActiveCfg = Release|x86
+		{36067C3E-5023-4304-B435-9F136CC7F00C}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -462,5 +462,6 @@ Global
 		{E5B54E27-B13B-4C5D-BD3E-941837C4A598} = {4FD2B635-11BD-4532-96F6-97ECB41072A1}
 		{34933AD1-8691-44B9-BDB4-4BF022C34552} = {4FD2B635-11BD-4532-96F6-97ECB41072A1}
 		{D9441890-33EF-48DF-BCB9-BAC4FD749F89} = {4FD2B635-11BD-4532-96F6-97ECB41072A1}
+		{36067C3E-5023-4304-B435-9F136CC7F00C} = {4FD2B635-11BD-4532-96F6-97ECB41072A1}
 	EndGlobalSection
 EndGlobal
