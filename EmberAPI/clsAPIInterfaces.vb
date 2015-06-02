@@ -300,6 +300,48 @@ Public Class Interfaces
 
     End Interface
 
+    Public Interface ScraperModule_Subtitle_Movie
+
+#Region "Events"
+
+        Event ModuleSettingsChanged()
+
+        Event ScraperEvent(ByVal eType As Enums.ScraperEventType_Movie, ByVal Parameter As Object)
+
+        Event ScraperSetupChanged(ByVal name As String, ByVal State As Boolean, ByVal difforder As Integer)
+
+        Event SetupNeedsRestart()
+
+        Event ProgressUpdated(ByVal iPercent As Integer)
+
+#End Region 'Events
+
+#Region "Properties"
+
+        ReadOnly Property ModuleName() As String
+
+        ReadOnly Property ModuleVersion() As String
+
+        Property ScraperEnabled() As Boolean
+
+#End Region 'Properties
+
+#Region "Methods"
+
+        Sub ScraperOrderChanged()
+
+        Sub Init(ByVal sAssemblyName As String)
+
+        Function InjectSetupScraper() As Containers.SettingsPanel
+
+        Sub SaveSetupScraper(ByVal DoDispose As Boolean)
+
+        Function Scraper(ByRef DBMovie As Structures.DBMovie, ByRef SubtitleList As List(Of MediaContainers.Subtitle)) As Interfaces.ModuleResult
+
+#End Region 'Methods
+
+    End Interface
+
     Public Interface ScraperModule_Theme_Movie
 
 #Region "Events"

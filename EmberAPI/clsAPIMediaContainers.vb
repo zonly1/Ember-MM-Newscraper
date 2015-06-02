@@ -2920,6 +2920,39 @@ Namespace MediaContainers
 
     End Class
 
+    Public Class [Subtitle]
+
+#Region "Constructors"
+
+        Public Sub New()
+            Me.Clear()
+        End Sub
+
+#End Region 'Constructors
+
+#Region "Properties"
+        Public Property Title As String
+        Public Property Quality As String
+        Public Property URL As String ' path to subtitle (local or url)
+        Public Property WebSubtitle As Subtitles
+        Public Property ShortLang As String
+        Public Property LongLang As String
+
+#End Region 'Properties
+
+#Region "Methods"
+
+        Public Sub Clear()
+            Me._URL = String.Empty
+            Me._Quality = String.Empty
+            Me._Title = String.Empty
+            Me._WebSubtitle = New Subtitles
+        End Sub
+
+#End Region 'Methods
+
+    End Class
+
     Public Class [Theme]
 
 #Region "Constructors"

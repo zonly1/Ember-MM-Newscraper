@@ -276,11 +276,11 @@ Public Class dlgSettings
              .Panel = Me.pnlMovieImages, _
              .Order = 400})
         Me.SettingsPanels.Add(New Containers.SettingsPanel With { _
-             .Name = "pnlMovieTrailer", _
-             .Text = Master.eLang.GetString(559, "Scrapers - Trailers"), _
-             .ImageIndex = 6, _
+             .Name = "pnlMovieSubtitle", _
+             .Text = Master.eLang.GetString(744, "Scrapers - Subtitles"), _
+             .ImageIndex = 12, _
              .Type = Master.eLang.GetString(36, "Movies"), _
-             .Panel = Me.pnlMovieTrailers, _
+             .Panel = Me.pnlMovieSubtitles, _
              .Order = 500})
         Me.SettingsPanels.Add(New Containers.SettingsPanel With { _
              .Name = "pnlMovieTheme", _
@@ -289,6 +289,13 @@ Public Class dlgSettings
              .Type = Master.eLang.GetString(36, "Movies"), _
              .Panel = Me.pnlMovieThemes, _
              .Order = 600})
+        Me.SettingsPanels.Add(New Containers.SettingsPanel With { _
+             .Name = "pnlMovieTrailer", _
+             .Text = Master.eLang.GetString(559, "Scrapers - Trailers"), _
+             .ImageIndex = 13, _
+             .Type = Master.eLang.GetString(36, "Movies"), _
+             .Panel = Me.pnlMovieTrailers, _
+             .Order = 700})
         Me.SettingsPanels.Add(New Containers.SettingsPanel With { _
              .Name = "pnlMovieSets", _
              .Text = Master.eLang.GetString(38, "General"), _
@@ -434,6 +441,17 @@ Public Class dlgSettings
             Me.AddHelpHandlers(tPanel.Panel, tPanel.Prefix)
         Next
         ModuleCounter = 1
+        For Each s As ModulesManager._externalScraperModuleClass_Subtitle_Movie In ModulesManager.Instance.externalScrapersModules_Subtitle_Movie.OrderBy(Function(x) x.ModuleOrder)
+            tPanel = s.ProcessorModule.InjectSetupScraper
+            tPanel.Order += ModuleCounter
+            Me.SettingsPanels.Add(tPanel)
+            ModuleCounter += 1
+            AddHandler s.ProcessorModule.ScraperSetupChanged, AddressOf Handle_ModuleSetupChanged
+            AddHandler s.ProcessorModule.ModuleSettingsChanged, AddressOf Handle_ModuleSettingsChanged
+            AddHandler s.ProcessorModule.SetupNeedsRestart, AddressOf Handle_SetupNeedsRestart
+            Me.AddHelpHandlers(tPanel.Panel, tPanel.Prefix)
+        Next
+        ModuleCounter = 1
         For Each s As ModulesManager._externalScraperModuleClass_Theme_Movie In ModulesManager.Instance.externalScrapersModules_Theme_Movie.OrderBy(Function(x) x.ModuleOrder)
             tPanel = s.ProcessorModule.InjectSetupScraper
             tPanel.Order += ModuleCounter
@@ -518,6 +536,11 @@ Public Class dlgSettings
             RemoveHandler s.ProcessorModule.SetupNeedsRestart, AddressOf Handle_SetupNeedsRestart
         Next
         For Each s As ModulesManager._externalScraperModuleClass_Image_TV In ModulesManager.Instance.externalScrapersModules_Image_TV.OrderBy(Function(x) x.ModuleOrder)
+            RemoveHandler s.ProcessorModule.ScraperSetupChanged, AddressOf Handle_ModuleSetupChanged
+            RemoveHandler s.ProcessorModule.ModuleSettingsChanged, AddressOf Handle_ModuleSettingsChanged
+            RemoveHandler s.ProcessorModule.SetupNeedsRestart, AddressOf Handle_SetupNeedsRestart
+        Next
+        For Each s As ModulesManager._externalScraperModuleClass_Subtitle_Movie In ModulesManager.Instance.externalScrapersModules_Subtitle_Movie.OrderBy(Function(x) x.ModuleOrder)
             RemoveHandler s.ProcessorModule.ScraperSetupChanged, AddressOf Handle_ModuleSetupChanged
             RemoveHandler s.ProcessorModule.ModuleSettingsChanged, AddressOf Handle_ModuleSettingsChanged
             RemoveHandler s.ProcessorModule.SetupNeedsRestart, AddressOf Handle_SetupNeedsRestart
@@ -6796,6 +6819,7 @@ Public Class dlgSettings
 
         'Subtitles
         Dim strSubtitles As String = Master.eLang.GetString(152, "Subtitles")
+        Me.gbMovieSubtitleOpts.Text = strSubtitles
 
         'Tagline
         Dim strTagline As String = Master.eLang.GetString(397, "Tagline")
@@ -6803,6 +6827,10 @@ Public Class dlgSettings
 
         'Theme
         Dim strTheme As String = Master.eLang.GetString(1118, "Theme")
+
+        'Themes
+        Dim strThemes As String = Master.eLang.GetString(1285, "Themes")
+        Me.gbMovieThemeOpts.Text = strThemes
 
         'Title
         Dim strTitle As String = Master.eLang.GetString(21, "Title")
@@ -7062,7 +7090,6 @@ Public Class dlgSettings
         Me.chkTVScraperMetaDataScan.Text = Me.chkMovieScraperMetaDataScan.Text
         Me.chkTVShowProperCase.Text = Me.chkMovieProperCase.Text
         Me.gbMovieSetGeneralMediaListOpts.Text = Me.gbMovieGeneralMediaListOpts.Text
-        Me.gbMovieThemeOpts.Text = Me.gbGeneralThemes.Text
         Me.gbTVScraperDefFIExtOpts.Text = Me.gbTVScraperDefFIExtOpts.Text
         Me.lblSettingsTopTitle.Text = Me.Text
         Me.lblTVLanguageOverlay.Text = Me.lblMovieLanguageOverlay.Text

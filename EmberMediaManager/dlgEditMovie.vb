@@ -1027,6 +1027,40 @@ Public Class dlgEditMovie
         End Try
     End Sub
 
+    Private Sub btnSetMovieSubtitleScrape_Click(sender As Object, e As EventArgs) Handles btnSetMovieSubtitleScrape.Click
+        Dim pResults As New MediaContainers.Subtitle
+        'Dim dlgImgS As dlgImgSelect
+        Dim aList As New List(Of MediaContainers.Subtitle)
+        Dim efList As New List(Of String)
+        Dim etList As New List(Of String)
+
+        Try
+            If Not ModulesManager.Instance.ScrapeSubtitle_Movie(Master.currMovie, aList, True) Then
+                If aList.Count > 0 Then
+                    'dlgImgS = New dlgImgSelect()
+                    'If dlgImgS.ShowDialog(Master.currMovie, Enums.ImageType_Movie.Poster, aList, efList, etList, True) = Windows.Forms.DialogResult.OK Then
+                    '    pResults = dlgImgS.Results
+                    '    If Not String.IsNullOrEmpty(pResults.URL) Then
+                    '        Cursor = Cursors.WaitCursor
+                    '        pResults.WebImage.FromWeb(pResults.URL)
+                    '        If pResults.WebImage.Image IsNot Nothing Then
+                    '            pbMoviePoster.Image = CType(pResults.WebImage.Image.Clone(), Image)
+                    '            Me.lblMoviePosterSize.Text = String.Format(Master.eLang.GetString(269, "Size: {0}x{1}"), Me.pbMoviePoster.Image.Width, Me.pbMoviePoster.Image.Height)
+                    '            Me.lblMoviePosterSize.Visible = True
+                    '        End If
+                    '        Cursor = Cursors.Default
+                    '    End If
+                    '    MoviePoster = pResults.WebImage
+                    'End If
+                Else
+                    'MessageBox.Show(Master.eLang.GetString(971, "No poster images could be found. Please check to see if any poster scrapers are enabled."), Master.eLang.GetString(972, "No Posters Found"), MessageBoxButtons.OK, MessageBoxIcon.Information)
+                End If
+            End If
+        Catch ex As Exception
+            logger.Error(New StackFrame().GetMethod().Name, ex)
+        End Try
+    End Sub
+
     'Private Sub btnSetMovieThemeDL_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnSetMovieThemeDL.Click
     '    Dim tResults As New MediaContainers.Theme
     '    Dim dlgTheS As dlgThemeSelect
