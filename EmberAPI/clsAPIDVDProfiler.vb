@@ -80,67 +80,6 @@ Public Class DVDProfiler
         Return sChannels
     End Function
 
-    ''' <summary>
-    ''' 
-    ''' </summary>
-    ''' <param name="cMovie"></param>
-    ''' <returns></returns>
-    ''' <remarks></remarks>
-    Public Shared Function MergeToDBMovie(ByVal cMovie As DVDProfiler.cDVD) As Database.DBElement
-        Dim tMovie As New Database.DBElement
-        tMovie.Movie = New MediaContainers.Movie
-
-        tMovie.IsSingle = True
-
-        tMovie.DVDProfilerTitle = cMovie.Title
-        tMovie.Movie.Title = cMovie.Title
-        tMovie.OfflineHolderFoldername = String.Concat(cMovie.Title, " [Offline]")
-        tMovie.Movie.Year = cMovie.ProductionYear
-        tMovie.DVDProfilerCaseType = cMovie.CaseType
-        If cMovie.Discs.Disc.Count > 0 Then
-            tMovie.DVDProfilerLocation = cMovie.Discs.Disc(0).dLocation
-            tMovie.DVDProfilerSlot = cMovie.Discs.Disc(0).dSlot
-        End If
-
-        Select Case True
-            Case cMovie.MediaTypes.BluRay = True
-                tMovie.DVDProfilerMediaType = "BluRay"
-                tMovie.VideoSource = "bluray"
-            Case cMovie.MediaTypes.DVD = True
-                tMovie.DVDProfilerMediaType = "DVD"
-                tMovie.VideoSource = "dvd"
-            Case cMovie.MediaTypes.HDDVD = True
-                tMovie.DVDProfilerMediaType = "HDDVD"
-                tMovie.VideoSource = "hddvd"
-        End Select
-
-        If cMovie.Subtitles.Subtitle.Count > 0 Then
-            For Each sStream In cMovie.Subtitles.Subtitle
-                Dim stream_s As New MediaInfo.Subtitle
-                stream_s.LongLanguage = sStream
-                stream_s.Language = Localization.ISOLangGetCode3ByLang(sStream)
-                stream_s.SubsType = "Embedded"
-                tMovie.Movie.FileInfo.StreamDetails.Subtitle.Add(DirectCast(stream_s, MediaInfo.Subtitle))
-            Next
-        End If
-
-        If cMovie.Audio.AudioTrack.Count > 0 Then
-            For Each aStream In cMovie.Audio.AudioTrack
-                If Not aStream.AudioContent = "Commentary" Then
-                    Dim stream_a As New MediaInfo.Audio
-                    stream_a.Channels = DVDProfiler.ConvertAChannels(aStream.AudioChannels)
-                    stream_a.Codec = DVDProfiler.ConvertAFormat(aStream.AudioFormat).ToLower
-                    stream_a.LongLanguage = aStream.AudioContent
-                    stream_a.Language = Localization.ISOLangGetCode3ByLang(aStream.AudioContent)
-                    tMovie.Movie.FileInfo.StreamDetails.Audio.Add(DirectCast(stream_a, MediaInfo.Audio))
-                End If
-            Next
-        End If
-
-        'TODO: add video tracks
-        Return tMovie
-    End Function
-
 #End Region 'Methods
 
 #Region "Nested Types"
@@ -345,6 +284,7 @@ Public Class DVDProfiler
         End Sub
 
 #End Region 'Methods
+
     End Class 'cDVD
 
     Public Class dMediaTypes
@@ -408,6 +348,7 @@ Public Class DVDProfiler
         End Sub
 
 #End Region 'Methods
+
     End Class 'dMediaTypes
 
     <XmlRoot("Subtitles")> _
@@ -448,6 +389,7 @@ Public Class DVDProfiler
         End Sub
 
 #End Region 'Methods
+
     End Class
 
     Public Class dDiscs
@@ -487,6 +429,7 @@ Public Class DVDProfiler
         End Sub
 
 #End Region 'Methods
+
     End Class 'dDiscs
 
     Public Class dDisc
@@ -538,6 +481,7 @@ Public Class DVDProfiler
         End Sub
 
 #End Region 'Methods
+
     End Class 'dDisc
 
     Public Class dAudio
@@ -577,6 +521,7 @@ Public Class DVDProfiler
         End Sub
 
 #End Region 'Methods
+
     End Class 'dAudio
 
     Public Class dAudioTrack
@@ -640,6 +585,7 @@ Public Class DVDProfiler
         End Sub
 
 #End Region 'Methods
+
     End Class 'dAudioTrack
 
 #End Region 'Nested Types

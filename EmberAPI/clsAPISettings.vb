@@ -2126,6 +2126,15 @@ Public Class Settings
         End Set
     End Property
 
+    Public Property OMMMediaStubTitle() As String
+        Get
+            Return Settings._XMLSettings.OMMMediaStubTitle
+        End Get
+        Set(ByVal value As String)
+            Settings._XMLSettings.OMMMediaStubTitle = value
+        End Set
+    End Property
+
     Public Property MovieScraperCertOnlyValue() As Boolean
         Get
             Return Settings._XMLSettings.MovieScraperCertOnlyValue

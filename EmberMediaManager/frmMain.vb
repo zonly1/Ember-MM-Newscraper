@@ -898,8 +898,6 @@ Public Class frmMain
         FilterMovement_Shows()
     End Sub
 
-
-
     Private Sub btnMarkAll_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnMarkAll.Click
         Try
             Dim MarkAll As Boolean = Not btnMarkAll.Text = Master.eLang.GetString(105, "Unmark All")
@@ -15531,9 +15529,9 @@ doCancel:
 
     Private Sub mnuMainToolsOfflineMM_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles mnuMainToolsOfflineHolder.Click, cmnuTrayToolsOfflineHolder.Click
         Me.SetControlsEnabled(False)
-        'Using dOfflineHolder As New dlgOfflineHolder
-        '    dOfflineHolder.ShowDialog()
-        'End Using
+        Using dOfflineHolder As New dlgOfflineHolder
+            dOfflineHolder.ShowDialog()
+        End Using
         Me.LoadMedia(New Structures.Scans With {.Movies = True, .TV = False})
         Me.SetControlsEnabled(True)
     End Sub

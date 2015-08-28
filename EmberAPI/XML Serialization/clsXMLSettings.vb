@@ -297,6 +297,7 @@ Partial Public Class clsXMLSettings
     Private _ommdummyusefanart As Boolean
     Private _ommdummyuseoverlay As Boolean
     Private _ommmediastubtagline As String
+    Private _ommmediastubtitle As String
     Private _password As String
     Private _proxycredentials As NetworkCredential
     Private _proxyport As Integer
@@ -3055,6 +3056,15 @@ Partial Public Class clsXMLSettings
         End Get
         Set(ByVal value As String)
             Me._ommmediastubtagline = value
+        End Set
+    End Property
+
+    Public Property OMMMediaStubTitle() As String
+        Get
+            Return Me._ommmediastubtitle
+        End Get
+        Set(ByVal value As String)
+            Me._ommmediastubtitle = value
         End Set
     End Property
 

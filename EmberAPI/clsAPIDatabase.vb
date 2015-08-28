@@ -5408,7 +5408,6 @@ Public Class Database
             Stream.Close()
         End Function
 
-
 #End Region 'Methods
 
     End Class
