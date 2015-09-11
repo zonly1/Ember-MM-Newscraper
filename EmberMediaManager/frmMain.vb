@@ -2599,6 +2599,9 @@ Public Class frmMain
                                 ModulesManager.Instance.ScrapeImage_TV(tEpisode, epImagesContainer, tScrapeItem.ScrapeModifier, False)
                                 Images.GetPreferredTVEpisodePoster(epImagesContainer.EpisodePosters, imgResult, tEpisode.TVEpisode.Season, tEpisode.TVEpisode.Episode)
                                 tEpisode.ImagesContainer.Poster = imgResult
+                                If Master.eSettings.MovieScraperMetaDataScan AndAlso tScrapeItem.ScrapeModifier.EpisodeMeta Then
+                                    MediaInfo.UpdateTVMediaInfo(tEpisode)
+                                End If
                             Next
                         End If
                     End If
@@ -2716,7 +2719,7 @@ Public Class frmMain
             If bwTVEpisodeScraper.CancellationPending Then Exit For
 
             If Not Cancelled Then
-                If Master.eSettings.TVScraperMetaDataScan AndAlso tScrapeItem.ScrapeModifier.MainMeta Then
+                If Master.eSettings.TVScraperMetaDataScan AndAlso tScrapeItem.ScrapeModifier.EpisodeMeta Then
                     MediaInfo.UpdateTVMediaInfo(DBScrapeEpisode)
                 End If
                 If bwTVEpisodeScraper.CancellationPending Then Exit For
