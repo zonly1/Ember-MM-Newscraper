@@ -80,7 +80,7 @@ Public Class dlgMovieDataScraperPreview
         lblTop250.Text = Master.eLang.GetString(240, "Top 250:")
         lblTopDetails.Text = Master.eLang.GetString(1254, "Only data in selected tabs will be used!")
         lblTopTitle.Text = Master.eLang.GetString(1253, "Scraperresults")
-        lblTrailerURL.Text = Master.eLang.GetString(227, "Trailer URL:")
+        lblTrailerURL.Text = String.Concat(Master.eLang.GetString(227, "Trailer URL"), ":")
         lblVotes.Text = Master.eLang.GetString(244, "Votes:")
         lblYear.Text = Master.eLang.GetString(49, "Year:")
     End Sub
@@ -228,7 +228,7 @@ Public Class dlgMovieDataScraperPreview
 
                     'Top250
                     If scraperresult.Top250Specified Then
-                        .txtTOP250IMDB.Text = scraperresult.Top250
+                        .txtTOP250IMDB.Text = scraperresult.Top250.ToString
                         tbTOP250.SelectedTab = tbTOP250IMDB
                     Else
                         tbTOP250.TabPages.Remove(tbTOP250IMDB)
@@ -396,7 +396,7 @@ Public Class dlgMovieDataScraperPreview
 
                     'Top250
                     If scraperresult.Top250Specified Then
-                        .txtTOP250TMDB.Text = scraperresult.Top250
+                        .txtTOP250TMDB.Text = scraperresult.Top250.ToString
                         tbTOP250.SelectedTab = tbTOP250TMDB
                     Else
                         tbTOP250.TabPages.Remove(tbTOP250TMDB)
@@ -563,7 +563,7 @@ Public Class dlgMovieDataScraperPreview
 
                     'Top250
                     If scraperresult.Top250Specified Then
-                        .txtTOP250OFDB.Text = scraperresult.Top250
+                        .txtTOP250OFDB.Text = scraperresult.Top250.ToString
                         tbTOP250.SelectedTab = tbTOP250OFDB
                     Else
                         tbTOP250.TabPages.Remove(tbTOP250OFDB)
@@ -730,7 +730,7 @@ Public Class dlgMovieDataScraperPreview
 
                     'Top250
                     If scraperresult.Top250Specified Then
-                        .txtTOP250Moviepilot.Text = scraperresult.Top250
+                        .txtTOP250Moviepilot.Text = scraperresult.Top250.ToString
                         tbTOP250.SelectedTab = tbTOP250Moviepilot
                     Else
                         tbTOP250.TabPages.Remove(tbTOP250Moviepilot)
@@ -1014,12 +1014,10 @@ Public Class dlgMovieDataScraperPreview
     Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
         Try
             SaveSelectedScraperData()
-            DialogResult = System.Windows.Forms.DialogResult.OK
-            Close()
+            DialogResult = DialogResult.OK
         Catch ex As Exception
             logger.Error(ex, New StackFrame().GetMethod().Name)
-            DialogResult = System.Windows.Forms.DialogResult.OK
-            Close()
+            DialogResult = DialogResult.OK
         End Try
     End Sub
 

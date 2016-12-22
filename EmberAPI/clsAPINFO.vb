@@ -29,7 +29,9 @@ Imports System.Windows.Forms
 Public Class NFO
 
 #Region "Fields"
-    Shared logger As Logger = NLog.LogManager.GetCurrentClassLogger()
+
+    Shared logger As Logger = LogManager.GetCurrentClassLogger()
+
 #End Region
 
 #Region "Methods"
@@ -77,12 +79,11 @@ Public Class NFO
         For Each scrapedmovie In ScrapedList
 
             'IDs
-            If scrapedmovie.IMDBIDSpecified Then
-                DBMovie.Movie.IMDBID = scrapedmovie.IMDBID
-                DBMovie.Movie.ID = scrapedmovie.ID
+            If scrapedmovie.IMDBSpecified Then
+                DBMovie.Movie.IMDB = scrapedmovie.IMDB
             End If
-            If scrapedmovie.TMDBIDSpecified Then
-                DBMovie.Movie.TMDBID = scrapedmovie.TMDBID
+            If scrapedmovie.TMDBSpecified Then
+                DBMovie.Movie.TMDB = scrapedmovie.TMDB
             End If
 
             'Actors
@@ -161,12 +162,12 @@ Public Class NFO
             End If
 
             'Collections
-            If (DBMovie.Movie.Sets.Count = 0 OrElse Not Master.eSettings.MovieLockCollections) AndAlso
-                scrapedmovie.Sets.Count > 0 AndAlso Master.eSettings.MovieScraperCollectionsAuto AndAlso Not new_Collections Then
+            If (Not DBMovie.Movie.SetsSpecified OrElse Not Master.eSettings.MovieLockCollections) AndAlso
+                scrapedmovie.SetsSpecified AndAlso Master.eSettings.MovieScraperCollectionsAuto AndAlso Not new_Collections Then
                 DBMovie.Movie.Sets.Clear()
                 For Each movieset In scrapedmovie.Sets
                     If Not String.IsNullOrEmpty(movieset.Title) Then
-                        For Each sett As AdvancedSettingsSetting In clsAdvancedSettings.GetAllSettings.Where(Function(y) y.Name.StartsWith("MovieSetTitleRenamer:"))
+                        For Each sett As AdvancedSettingsSetting In AdvancedSettings.GetAllSettings.Where(Function(y) y.Name.StartsWith("MovieSetTitleRenamer:"))
                             movieset.Title = movieset.Title.Replace(sett.Name.Substring(21), sett.Value)
                         Next
                     End If
@@ -322,13 +323,13 @@ Public Class NFO
                 DBMovie.Movie.Title = String.Empty
             End If
 
-            'Top250
+            'Top250 (special handling: no check if "scrapedmovie.Top250Specified" and only set "new_Top250 = True" if a value over 0 has been set)
             If (Not DBMovie.Movie.Top250Specified OrElse Not Master.eSettings.MovieLockTop250) AndAlso ScrapeOptions.bMainTop250 AndAlso
-                scrapedmovie.Top250Specified AndAlso Master.eSettings.MovieScraperTop250 AndAlso Not new_Top250 Then
+                Master.eSettings.MovieScraperTop250 AndAlso Not new_Top250 Then
                 DBMovie.Movie.Top250 = scrapedmovie.Top250
-                new_Top250 = True
+                new_Top250 = If(scrapedmovie.Top250Specified, True, False)
             ElseIf Master.eSettings.MovieScraperCleanFields AndAlso Not Master.eSettings.MovieScraperTop250 AndAlso Not Master.eSettings.MovieLockTop250 Then
-                DBMovie.Movie.Top250 = String.Empty
+                DBMovie.Movie.Top250 = 0
             End If
 
             'Trailer
@@ -436,7 +437,7 @@ Public Class NFO
         Next
 
         'set Title
-        For Each sett As AdvancedSettingsSetting In clsAdvancedSettings.GetAllSettings.Where(Function(y) y.Name.StartsWith("MovieSetTitleRenamer:"))
+        For Each sett As AdvancedSettingsSetting In AdvancedSettings.GetAllSettings.Where(Function(y) y.Name.StartsWith("MovieSetTitleRenamer:"))
             DBMovieSet.MovieSet.Title = DBMovieSet.MovieSet.Title.Replace(sett.Name.Substring(21), sett.Value)
         Next
 
@@ -832,6 +833,7 @@ Public Class NFO
                 Dim strAiredDate As String = aKnownEpisode.AiredDate
                 If DBTV.Ordering = Enums.EpisodeOrdering.Absolute Then
                     iEpisode = aKnownEpisode.EpisodeAbsolute
+                    iSeason = 1
                 ElseIf DBTV.Ordering = Enums.EpisodeOrdering.DVD Then
                     iEpisode = CInt(aKnownEpisode.EpisodeDVD)
                     iSeason = aKnownEpisode.SeasonDVD
@@ -1206,6 +1208,7 @@ Public Class NFO
             Dim strAiredDate As String = KnownEpisodesIndex.Item(0).AiredDate
             If DBTVEpisode.Ordering = Enums.EpisodeOrdering.Absolute Then
                 iEpisode = KnownEpisodesIndex.Item(0).EpisodeAbsolute
+                iSeason = 1
             ElseIf DBTVEpisode.Ordering = Enums.EpisodeOrdering.DVD Then
                 iEpisode = CInt(KnownEpisodesIndex.Item(0).EpisodeDVD)
                 iSeason = KnownEpisodesIndex.Item(0).SeasonDVD
@@ -1267,7 +1270,7 @@ Public Class NFO
                     Next
                 End If
             End If
-            If mNFO.Sets.Count > 0 Then
+            If mNFO.SetsSpecified Then
                 For i = mNFO.Sets.Count - 1 To 0 Step -1
                     If Not mNFO.Sets(i).TitleSpecified Then
                         mNFO.Sets.RemoveAt(i)
@@ -1676,7 +1679,7 @@ Public Class NFO
         For Each sFile As String In lFiles
             Using srInfo As New StreamReader(sFile)
                 Dim sInfo As String = srInfo.ReadToEnd
-                Dim sIMDBID As String = Regex.Match(sInfo, "tt\d\d\d\d\d\d\d", RegexOptions.Multiline Or RegexOptions.Singleline Or RegexOptions.IgnoreCase).ToString
+                Dim sIMDBID As String = Regex.Match(sInfo, "tt\d\d\d\d\d\d\d*", RegexOptions.Multiline Or RegexOptions.Singleline Or RegexOptions.IgnoreCase).ToString
 
                 If Not String.IsNullOrEmpty(sIMDBID) Then
                     tNonConf.IMDBID = sIMDBID
@@ -1686,7 +1689,7 @@ Public Class NFO
                     End If
                     Exit For
                 Else
-                    sIMDBID = Regex.Match(sPath, "tt\d\d\d\d\d\d\d", RegexOptions.Multiline Or RegexOptions.Singleline Or RegexOptions.IgnoreCase).ToString
+                    sIMDBID = Regex.Match(sPath, "tt\d\d\d\d\d\d\d*", RegexOptions.Multiline Or RegexOptions.Singleline Or RegexOptions.IgnoreCase).ToString
                     If Not String.IsNullOrEmpty(sIMDBID) Then
                         tNonConf.IMDBID = sIMDBID
                     End If
@@ -1903,13 +1906,13 @@ Public Class NFO
                     If Not String.IsNullOrEmpty(sPath) Then
                         Dim sReturn As New NonConf
                         sReturn = GetIMDBFromNonConf(sPath, isSingle)
-                        xmlMov.IMDBID = sReturn.IMDBID
+                        xmlMov.IMDB = sReturn.IMDBID
                         Try
                             If Not String.IsNullOrEmpty(sReturn.Text) Then
                                 Using xmlSTR As StringReader = New StringReader(sReturn.Text)
                                     xmlSer = New XmlSerializer(GetType(MediaContainers.Movie))
                                     xmlMov = DirectCast(xmlSer.Deserialize(xmlSTR), MediaContainers.Movie)
-                                    xmlMov.IMDBID = sReturn.IMDBID
+                                    xmlMov.IMDB = sReturn.IMDBID
                                     xmlMov = CleanNFO_Movies(xmlMov)
                                 End Using
                             End If
@@ -1931,13 +1934,13 @@ Public Class NFO
 
                     Dim sReturn As New NonConf
                     sReturn = GetIMDBFromNonConf(sPath, isSingle)
-                    xmlMov.IMDBID = sReturn.IMDBID
+                    xmlMov.IMDB = sReturn.IMDBID
                     Try
                         If Not String.IsNullOrEmpty(sReturn.Text) Then
                             Using xmlSTR As StringReader = New StringReader(sReturn.Text)
                                 xmlSer = New XmlSerializer(GetType(MediaContainers.Movie))
                                 xmlMov = DirectCast(xmlSer.Deserialize(xmlSTR), MediaContainers.Movie)
-                                xmlMov.IMDBID = sReturn.IMDBID
+                                xmlMov.IMDB = sReturn.IMDBID
                                 xmlMov = CleanNFO_Movies(xmlMov)
                             End Using
                         End If
@@ -2281,8 +2284,8 @@ Public Class NFO
 
                 'YAMJ support
                 If Master.eSettings.MovieUseYAMJ AndAlso Master.eSettings.MovieNFOYAMJ Then
-                    If tMovie.TMDBIDSpecified Then
-                        tMovie.TMDBID = String.Empty
+                    If tMovie.TMDBSpecified Then
+                        tMovie.TMDB = String.Empty
                     End If
                 End If
 

@@ -177,11 +177,14 @@ Public Class KodiInterface
     ''' </remarks>
     Public Function RunGeneric(ByVal mType As Enums.ModuleEventType, ByRef _params As List(Of Object), ByRef _singleobjekt As Object, ByRef _dbelement As Database.DBElement) As Interfaces.ModuleResult Implements Interfaces.GenericModule.RunGeneric
         If Not Master.isCL AndAlso (
-            mType = Enums.ModuleEventType.Sync_Movie OrElse
-            mType = Enums.ModuleEventType.Sync_MovieSet OrElse
-            mType = Enums.ModuleEventType.Sync_TVEpisode OrElse
-            mType = Enums.ModuleEventType.Sync_TVSeason OrElse
-            mType = Enums.ModuleEventType.Sync_TVShow) Then
+                mType = Enums.ModuleEventType.Remove_Movie OrElse
+                mType = Enums.ModuleEventType.Remove_TVEpisode OrElse
+                mType = Enums.ModuleEventType.Remove_TVShow OrElse
+                mType = Enums.ModuleEventType.Sync_Movie OrElse
+                mType = Enums.ModuleEventType.Sync_MovieSet OrElse
+                mType = Enums.ModuleEventType.Sync_TVEpisode OrElse
+                mType = Enums.ModuleEventType.Sync_TVSeason OrElse
+                mType = Enums.ModuleEventType.Sync_TVShow) Then
             'add job to tasklist and get everything done
             AddTask(New KodiTask With {.mType = mType, .mDBElement = _dbelement})
             Return New Interfaces.ModuleResult With {.breakChain = False}
@@ -376,18 +379,18 @@ Public Class KodiInterface
                             'connection test
                             If Await Task.Run(Function() _APIKodi.TestConnectionToHost) Then
                                 If mDBElement.Episodes IsNot Nothing Then
-                                    For Each tEpisode In mDBElement.Episodes
-                                        If mDBElement.IsOnline OrElse FileUtils.Common.CheckOnlineStatus_TVEpisode(mDBElement, True) Then
-                                            If mDBElement.NfoPathSpecified Then
+                                    For Each tEpisode In mDBElement.Episodes.Where(Function(f) f.FilenameSpecified)
+                                        If tEpisode.IsOnline OrElse FileUtils.Common.CheckOnlineStatus_TVEpisode(tEpisode, True) Then
+                                            If tEpisode.NfoPathSpecified Then
                                                 'run task
-                                                Dim Result = Await Task.Run(Function() _APIKodi.GetPlaycount_TVEpisode(mDBElement, GenericSubEventProgressAsync, GenericEventProcess))
+                                                Dim Result = Await Task.Run(Function() _APIKodi.GetPlaycount_TVEpisode(tEpisode, GenericSubEventProgressAsync, GenericEventProcess))
                                                 If Result IsNot Nothing Then
-                                                    mDBElement.TVEpisode.LastPlayed = Result.LastPlayed
-                                                    mDBElement.TVEpisode.Playcount = Result.PlayCount
-                                                    ModulesManager.Instance.RunGeneric(Enums.ModuleEventType.Notification, New List(Of Object)(New Object() {"info", Nothing, "Kodi Interface", String.Concat(mHost.Label, " | ", Master.eLang.GetString(1444, "Sync OK"), ": ", mDBElement.TVEpisode.Title), New Bitmap(My.Resources.logo)}))
+                                                    tEpisode.TVEpisode.LastPlayed = Result.LastPlayed
+                                                    tEpisode.TVEpisode.Playcount = Result.PlayCount
+                                                    ModulesManager.Instance.RunGeneric(Enums.ModuleEventType.Notification, New List(Of Object)(New Object() {"info", Nothing, "Kodi Interface", String.Concat(mHost.Label, " | ", Master.eLang.GetString(1444, "Sync OK"), ": ", tEpisode.TVEpisode.Title), New Bitmap(My.Resources.logo)}))
                                                 Else
-                                                    logger.Warn(String.Concat("[KodiInterface] [", mHost.Label, "] [GenericRunCallBack] | Sync Failed:  ", mDBElement.TVEpisode.Title))
-                                                    ModulesManager.Instance.RunGeneric(Enums.ModuleEventType.Notification, New List(Of Object)(New Object() {"error", 1, "Kodi Interface", String.Concat(mHost.Label, " | ", Master.eLang.GetString(1445, "Sync Failed"), ": ", mDBElement.TVEpisode.Title), Nothing}))
+                                                    logger.Warn(String.Concat("[KodiInterface] [", mHost.Label, "] [GenericRunCallBack] | Sync Failed:  ", tEpisode.TVEpisode.Title))
+                                                    ModulesManager.Instance.RunGeneric(Enums.ModuleEventType.Notification, New List(Of Object)(New Object() {"error", 1, "Kodi Interface", String.Concat(mHost.Label, " | ", Master.eLang.GetString(1445, "Sync Failed"), ": ", tEpisode.TVEpisode.Title), Nothing}))
                                                     getError = True
                                                 End If
                                             Else
@@ -587,7 +590,7 @@ Public Class KodiInterface
 
                     'Sync MovieSet
                 Case Enums.ModuleEventType.Sync_MovieSet
-                    If mDBElement.MovieListSpecified Then
+                    If mDBElement.MoviesInSetSpecified Then
                         If mHost IsNot Nothing Then
                             Dim _APIKodi As New Kodi.APIKodi(mHost)
 
@@ -797,7 +800,7 @@ Public Class KodiInterface
                                                     If Result IsNot Nothing Then
                                                         mDBElement.Movie.LastPlayed = Result.LastPlayed
                                                         mDBElement.Movie.PlayCount = Result.PlayCount
-                                                        Master.DB.Save_Movie(mDBElement, False, True, False, False)
+                                                        Master.DB.Save_Movie(mDBElement, False, True, False, True, False)
                                                         RaiseEvent GenericEvent(Enums.ModuleEventType.AfterEdit_Movie, New List(Of Object)(New Object() {mDBElement.ID}))
                                                         ModulesManager.Instance.RunGeneric(Enums.ModuleEventType.Notification, New List(Of Object)(New Object() {"info", Nothing, "Kodi Interface", String.Concat(mHost.Label, " | ", Master.eLang.GetString(1444, "Sync OK"), ": ", mDBElement.Movie.Title), New Bitmap(My.Resources.logo)}))
                                                     End If

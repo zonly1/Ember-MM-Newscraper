@@ -637,8 +637,7 @@ Public Class dlgWizard
     End Sub
 
     Private Sub Cancel_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Cancel_Button.Click
-        DialogResult = System.Windows.Forms.DialogResult.Cancel
-        Close()
+        DialogResult = DialogResult.Cancel
     End Sub
 
     Private Sub cbIntLang_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles cbIntLang.SelectedIndexChanged
@@ -732,7 +731,7 @@ Public Class dlgWizard
             chkMovieTrailerNMJ.Checked = .MovieTrailerNMJ
 
             '************** NMT optional settings **************
-            chkMovieYAMJCompatibleSets.Checked = .MovieYAMJCompatibleSets
+            chkMovieYAMJCompatibleSets.Checked = .MovieScraperCollectionsYAMJCompatibleSets
             chkMovieYAMJWatchedFile.Checked = .MovieYAMJWatchedFile
             txtMovieYAMJWatchedFolder.Text = .MovieYAMJWatchedFolder
 
@@ -950,8 +949,7 @@ Public Class dlgWizard
 
     Private Sub OK_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles OK_Button.Click
         SaveSettings()
-        DialogResult = System.Windows.Forms.DialogResult.OK
-        Close()
+        DialogResult = DialogResult.OK
     End Sub
 
     Private Sub RefreshSources()
@@ -1063,7 +1061,7 @@ Public Class dlgWizard
             End If
 
             'Workaround for tvdb scraper language (TODO: proper solution)
-            Using settings = New clsAdvancedSettings()
+            Using settings = New AdvancedSettings()
                 settings.SetSetting("TVDBLanguage", .TVGeneralLanguage, "scraper.TVDB")
             End Using
 
@@ -1126,7 +1124,7 @@ Public Class dlgWizard
             .MovieTrailerNMJ = chkMovieTrailerNMJ.Checked
 
             '************** NMJ optional settings *************
-            .MovieYAMJCompatibleSets = chkMovieYAMJCompatibleSets.Checked
+            .MovieScraperCollectionsYAMJCompatibleSets = chkMovieYAMJCompatibleSets.Checked
             .MovieYAMJWatchedFile = chkMovieYAMJWatchedFile.Checked
             .MovieYAMJWatchedFolder = txtMovieYAMJWatchedFolder.Text
 

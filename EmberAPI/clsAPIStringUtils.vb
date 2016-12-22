@@ -243,7 +243,7 @@ Public Class StringUtils
 
         Try
             sReturn = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(sString)
-            Dim toUpper As String = clsAdvancedSettings.GetSetting("ToProperCase", "\b(hd|cd|dvd|bc|b\.c\.|ad|a\.d\.|sw|nw|se|sw|ii|iii|iv|vi|vii|viii|ix|x)\b")
+            Dim toUpper As String = AdvancedSettings.GetSetting("ToProperCase", "\b(hd|cd|dvd|bc|b\.c\.|ad|a\.d\.|sw|nw|se|sw|ii|iii|iv|vi|vii|viii|ix|x)\b")
 
             Dim mcUp As MatchCollection = Regex.Matches(sReturn, toUpper, RegexOptions.IgnoreCase)
             For Each M As Match In mcUp
@@ -257,6 +257,10 @@ Public Class StringUtils
         End Try
 
         Return sReturn.Trim
+    End Function
+
+    Public Shared Function ConvertToValidFilterString(ByVal strInput As String) As String
+        Return strInput.Replace("["c, "[[]").Replace("'"c, "''").Replace("%"c, "[%]")
     End Function
     ''' <summary>
     ''' Determine the Levenshtein Distance between the two supplied strings.
@@ -375,10 +379,10 @@ Public Class StringUtils
         Return Result
     End Function
 
-    Public Shared Function FilterIMDBIDFromPath(ByVal strPath As String) As String
+    Public Shared Function FilterIMDBIDFromPath(ByVal strPath As String, Optional ByVal bRightToLeft As Boolean = False) As String
         If String.IsNullOrEmpty(strPath) Then Return String.Empty
 
-        Return Regex.Match(strPath, "tt\d*").Value.Trim
+        Return Regex.Match(strPath, "tt\d{6}\d*", If(bRightToLeft, RegexOptions.RightToLeft, RegexOptions.None)).Value.Trim
     End Function
     ''' <summary>
     ''' Cleans up a movie path by stripping it down to the basic title with no additional decorations.
@@ -395,11 +399,11 @@ Public Class StringUtils
         'get raw title from path
         Dim strRawTitle As String = String.Empty
         If FileUtils.Common.isVideoTS(strPath) Then
-            strRawTitle = Directory.GetParent(Directory.GetParent(strPath).FullName).Name
+            strRawTitle = FileUtils.Common.GetMainPath(strPath).Name
         ElseIf FileUtils.Common.isBDRip(strPath) Then
-            strRawTitle = Directory.GetParent(Directory.GetParent(Directory.GetParent(strPath).FullName).FullName).Name
+            strRawTitle = FileUtils.Common.GetMainPath(strPath).Name
         Else
-            strRawTitle = If(IsSingle AndAlso UseForderName, Directory.GetParent(strPath).Name, Path.GetFileNameWithoutExtension(strPath))
+            strRawTitle = If(IsSingle AndAlso UseForderName, FileUtils.Common.GetMainPath(strPath).Name, Path.GetFileNameWithoutExtension(strPath))
         End If
 
         'filter raw title by filter list
@@ -503,11 +507,11 @@ Public Class StringUtils
         'get raw string to get year from
         Dim strRawString As String = String.Empty
         If FileUtils.Common.isVideoTS(strPath) Then
-            strRawString = Directory.GetParent(Directory.GetParent(strPath).FullName).Name
+            strRawString = FileUtils.Common.GetMainPath(strPath).Name
         ElseIf FileUtils.Common.isBDRip(strPath) Then
-            strRawString = Directory.GetParent(Directory.GetParent(Directory.GetParent(strPath).FullName).FullName).Name
+            strRawString = FileUtils.Common.GetMainPath(strPath).Name
         Else
-            strRawString = If(IsSingle AndAlso UseForderName, Directory.GetParent(strPath).Name, Path.GetFileNameWithoutExtension(strPath))
+            strRawString = If(IsSingle AndAlso UseForderName, FileUtils.Common.GetMainPath(strPath).Name, Path.GetFileNameWithoutExtension(strPath))
         End If
 
         Return Regex.Match(strRawString, "((19|20)\d{2})", RegexOptions.RightToLeft).Value.Trim
@@ -579,10 +583,6 @@ Public Class StringUtils
         End If
         Return False
     End Function
-
-    Public Shared Function isValidFilterChar(ByVal KeyChar As Char) As Boolean
-        Return Not KeyChar = Convert.ToChar(39) AndAlso Not KeyChar = Convert.ToChar(91)
-    End Function
     ''' <summary>
     ''' Determine whether the format of the supplied URL is valid. No actual Internet query is made to see if
     ''' the URL is actually responsive.
@@ -636,7 +636,7 @@ Public Class StringUtils
     ''' </remarks>
     Public Shared Function NumericOnly(ByVal KeyChar As Char, Optional ByVal isIP As Boolean = False) As Boolean
         'TODO Dekker500 - This method is horribly named. It should be something like "IsInvalidNumericChar". Also, why are we allowing control chars, whitespace, or period?
-        If Char.IsNumber(KeyChar) OrElse Char.IsControl(KeyChar) OrElse Char.IsWhiteSpace(KeyChar) OrElse (isIP AndAlso Convert.ToInt32(KeyChar) = 46) Then
+        If Char.IsNumber(KeyChar) OrElse Char.IsControl(KeyChar) OrElse (isIP AndAlso Convert.ToInt32(KeyChar) = 46) Then
             Return False
         Else
             Return True

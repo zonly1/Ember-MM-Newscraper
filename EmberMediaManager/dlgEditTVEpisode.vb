@@ -1025,7 +1025,7 @@ Public Class dlgEditTVEpisode
         lblTitle.Text = Master.eLang.GetString(246, "Title:")
         lblTopDetails.Text = Master.eLang.GetString(656, "Edit the details for the selected episode.")
         lblTopTitle.Text = Master.eLang.GetString(657, "Edit Episode")
-        lblVideoSource.Text = Master.eLang.GetString(824, "Video Source:")
+        lblVideoSource.Text = String.Concat(Master.eLang.GetString(824, "Video Source"), ":")
         lblVotes.Text = Master.eLang.GetString(244, "Votes:")
         tpFanart.Text = Master.eLang.GetString(149, "Fanart")
         tpPoster.Text = Master.eLang.GetString(148, "Poster")
@@ -1035,11 +1035,11 @@ Public Class dlgEditTVEpisode
     End Sub
 
     Private Sub txtEpisode_KeyPress(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyPressEventArgs) Handles txtEpisode.KeyPress
-        e.Handled = StringUtils.NumericOnly(e.KeyChar, True) AndAlso Not e.KeyChar = "-"
+        e.Handled = StringUtils.NumericOnly(e.KeyChar)
     End Sub
 
     Private Sub txtSeason_KeyPress(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyPressEventArgs) Handles txtSeason.KeyPress
-        e.Handled = StringUtils.NumericOnly(e.KeyChar, True) AndAlso Not e.KeyChar = "-"
+        e.Handled = StringUtils.NumericOnly(e.KeyChar)
     End Sub
 
     Sub GenericRunCallBack(ByVal mType As Enums.ModuleEventType, ByRef _params As List(Of Object))

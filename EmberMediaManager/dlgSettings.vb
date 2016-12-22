@@ -2738,7 +2738,7 @@ Public Class dlgSettings
     End Sub
 
     Private Sub FillMovieSetScraperTitleRenamer()
-        For Each sett As AdvancedSettingsSetting In clsAdvancedSettings.GetAllSettings.Where(Function(y) y.Name.StartsWith("MovieSetTitleRenamer:"))
+        For Each sett As AdvancedSettingsSetting In AdvancedSettings.GetAllSettings.Where(Function(y) y.Name.StartsWith("MovieSetTitleRenamer:"))
             Dim i As Integer = dgvMovieSetScraperTitleRenamer.Rows.Add(New Object() {sett.Name.Substring(21), sett.Value})
             If Not sett.DefaultValue = String.Empty Then
                 dgvMovieSetScraperTitleRenamer.Rows(i).Tag = True
@@ -2753,11 +2753,11 @@ Public Class dlgSettings
 
     Private Sub SaveMovieSetScraperTitleRenamer()
         Dim deleteitem As New List(Of String)
-        For Each sett As AdvancedSettingsSetting In clsAdvancedSettings.GetAllSettings.Where(Function(y) y.Name.StartsWith("MovieSetTitleRenamer:"))
+        For Each sett As AdvancedSettingsSetting In AdvancedSettings.GetAllSettings.Where(Function(y) y.Name.StartsWith("MovieSetTitleRenamer:"))
             deleteitem.Add(sett.Name)
         Next
 
-        Using settings = New clsAdvancedSettings()
+        Using settings = New AdvancedSettings()
             For Each s As String In deleteitem
                 settings.CleanSetting(s, "*EmberAPP")
             Next
@@ -3025,6 +3025,8 @@ Public Class dlgSettings
             chkMovieScraperCleanPlotOutline.Checked = .MovieScraperCleanPlotOutline
             chkMovieScraperCollectionID.Checked = .MovieScraperCollectionID
             chkMovieScraperCollectionsAuto.Checked = .MovieScraperCollectionsAuto
+            chkMovieScraperCollectionsExtendedInfo.Checked = .MovieScraperCollectionsExtendedInfo
+            chkMovieScraperCollectionsYAMJCompatibleSets.Checked = .MovieScraperCollectionsYAMJCompatibleSets
             chkMovieScraperCountry.Checked = .MovieScraperCountry
             chkMovieScraperDirector.Checked = .MovieScraperDirector
             chkMovieScraperGenre.Checked = .MovieScraperGenre
@@ -3560,7 +3562,6 @@ Public Class dlgSettings
             chkMovieTrailerNMJ.Checked = .MovieTrailerNMJ
 
             '************** NMT optional settings **************
-            chkMovieYAMJCompatibleSets.Checked = .MovieYAMJCompatibleSets
             chkMovieYAMJWatchedFile.Checked = .MovieYAMJWatchedFile
             txtMovieYAMJWatchedFolder.Text = .MovieYAMJWatchedFolder
 
@@ -4170,6 +4171,7 @@ Public Class dlgSettings
     Private Sub LoadGeneralDateTime()
         Dim items As New Dictionary(Of String, Enums.DateTime)
         items.Add(Master.eLang.GetString(1210, "Current DateTime when adding"), Enums.DateTime.Now)
+        items.Add(Master.eLang.GetString(1227, "ctime (fallback to mtime)"), Enums.DateTime.ctime)
         items.Add(Master.eLang.GetString(1211, "mtime (fallback to ctime)"), Enums.DateTime.mtime)
         items.Add(Master.eLang.GetString(1212, "Newer of mtime and ctime"), Enums.DateTime.Newer)
         cbGeneralDateTime.DataSource = items.ToList
@@ -5101,6 +5103,8 @@ Public Class dlgSettings
             .MovieScraperCleanPlotOutline = chkMovieScraperCleanPlotOutline.Checked
             .MovieScraperCollectionID = chkMovieScraperCollectionID.Checked
             .MovieScraperCollectionsAuto = chkMovieScraperCollectionsAuto.Checked
+            .MovieScraperCollectionsExtendedInfo = chkMovieScraperCollectionsExtendedInfo.Checked
+            .MovieScraperCollectionsYAMJCompatibleSets = chkMovieScraperCollectionsYAMJCompatibleSets.Checked
             .MovieScraperCountry = chkMovieScraperCountry.Checked
             .MovieScraperDirector = chkMovieScraperDirector.Checked
             .MovieScraperDurationRuntimeFormat = txtMovieScraperDurationRuntimeFormat.Text
@@ -5491,7 +5495,6 @@ Public Class dlgSettings
             .MovieTrailerNMJ = chkMovieTrailerNMJ.Checked
 
             '************** NMJ optional settings *************
-            .MovieYAMJCompatibleSets = chkMovieYAMJCompatibleSets.Checked
             .MovieYAMJWatchedFile = chkMovieYAMJWatchedFile.Checked
             .MovieYAMJWatchedFolder = txtMovieYAMJWatchedFolder.Text
 
@@ -6631,6 +6634,10 @@ Public Class dlgSettings
         lblMovieScraperGlobalRuntime.Text = strRuntime
         lblTVScraperGlobalRuntime.Text = strRuntime
 
+        'Save extended Collection information to NFO (Kodi 16.0 "Jarvis" and newer)
+        Dim strSaveExtended As String = Master.eLang.GetString(1075, "Save extended Collection information to NFO (Kodi 16.0 ""Jarvis"" and newer)")
+        chkMovieScraperCollectionsExtendedInfo.Text = strSaveExtended
+
         'Scraper Fields - Global
         Dim strScraperGlobal As String = Master.eLang.GetString(577, "Scraper Fields - Global")
         gbMovieScraperGlobalOpts.Text = strScraperGlobal
@@ -6857,7 +6864,7 @@ Public Class dlgSettings
         chkMovieScraperStudioWithImg.Text = Master.eLang.GetString(1280, "Scrape Only Studios With Images")
         chkMovieScraperUseMDDuration.Text = Master.eLang.GetString(516, "Use Duration for Runtime")
         chkMovieScraperXBMCTrailerFormat.Text = Master.eLang.GetString(1187, "Save YouTube-Trailer-Links in XBMC compatible format")
-        chkMovieYAMJCompatibleSets.Text = Master.eLang.GetString(561, "YAMJ Compatible Sets")
+        chkMovieScraperCollectionsYAMJCompatibleSets.Text = Master.eLang.GetString(561, "Save YAMJ Compatible Sets to NFO")
         chkMovieSkipStackedSizeCheck.Text = Master.eLang.GetString(538, "Skip Size Check of Stacked Files")
         chkMovieSortBeforeScan.Text = Master.eLang.GetString(712, "Sort files into folder before each library update")
         chkMovieStackExpertMulti.Text = String.Format(Master.eLang.GetString(1178, "Stack {0}filename{1}"), "<", ">")
@@ -8199,7 +8206,6 @@ Public Class dlgSettings
         chkMovieUseBaseDirectoryExpertBDMV.CheckedChanged,
         chkMovieUseBaseDirectoryExpertVTS.CheckedChanged,
         chkMovieXBMCProtectVTSBDMV.CheckedChanged,
-        chkMovieYAMJCompatibleSets.CheckedChanged,
         chkTVAllSeasonsBannerKeepExisting.CheckedChanged,
         chkTVAllSeasonsBannerPrefSizeOnly.CheckedChanged,
         chkTVAllSeasonsFanartKeepExisting.CheckedChanged,
@@ -8390,6 +8396,8 @@ Public Class dlgSettings
         txtMoviePosterHeight.TextChanged,
         txtMoviePosterWidth.TextChanged,
         txtMovieScraperCastLimit.TextChanged,
+        chkMovieScraperCollectionsExtendedInfo.CheckedChanged,
+        chkMovieScraperCollectionsYAMJCompatibleSets.CheckedChanged,
         txtMovieScraperDurationRuntimeFormat.TextChanged,
         txtMovieScraperGenreLimit.TextChanged,
         txtMovieScraperMPAANotRated.TextChanged,

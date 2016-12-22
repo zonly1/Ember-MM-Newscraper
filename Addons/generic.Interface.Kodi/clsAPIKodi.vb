@@ -21,9 +21,10 @@
 Imports EmberAPI
 Imports generic.Interface.Kodi.KodiInterface
 Imports NLog
+Imports XBMCRPC
 Imports System.IO
 Imports System.Text.RegularExpressions
-Imports XBMCRPC
+Imports System.Web
 
 Namespace Kodi
 
@@ -512,6 +513,11 @@ Namespace Kodi
 
             If String.IsNullOrEmpty(strRemotePath) Then logger.Error(String.Format("[APIKodi] [{0}] GetRemotePath: ""{1}"" | Source not mapped!", _currenthost.Label, strLocalPath))
 
+            'Path encoding if needed
+            If Regex.IsMatch(strRemotePath, "davs?:\/\/") Then
+                strRemotePath = HttpUtility.UrlEncode(strRemotePath)
+            End If
+
             Return strRemotePath
         End Function
         ''' <summary>
@@ -771,11 +777,11 @@ Namespace Kodi
                     Next
 
                     'compare by movies inside movieset
-                    For Each tMovie In tDBElement.MovieList
+                    For Each tMovie In tDBElement.MoviesInSet
                         logger.Trace(String.Format("[APIKodi] [{0}] SearchMovieSetByDetails: ""{1}"" | NOT found in database, trying to find the movieset by movies...", _currenthost.Label, tDBElement.MovieSet.Title))
                         'search movie ID in Kodi DB
                         Dim MovieID As Integer = -1
-                        Dim KodiMovie = Await SearchMovie(tMovie).ConfigureAwait(False)
+                        Dim KodiMovie = Await SearchMovie(tMovie.DBMovie).ConfigureAwait(False)
                         If KodiMovie IsNot Nothing Then
                             For Each tMovieSet In kMovieSets.sets
                                 If tMovieSet.setid = KodiMovie.setid Then
@@ -1021,13 +1027,13 @@ Namespace Kodi
 
                     'string or string.empty
                     Dim mDateAdded As String = If(mDBElement.Movie.DateAddedSpecified, mDBElement.Movie.DateAdded, Nothing)
-                    Dim mImdbnumber As String = mDBElement.Movie.ID
+                    Dim mImdbnumber As String = mDBElement.Movie.IMDB
                     Dim mLastPlayed As String = mDBElement.Movie.LastPlayed
                     Dim mMPAA As String = mDBElement.Movie.MPAA
                     Dim mOriginalTitle As String = mDBElement.Movie.OriginalTitle
                     Dim mOutline As String = mDBElement.Movie.Outline
                     Dim mPlot As String = mDBElement.Movie.Plot
-                    Dim mSet As String = If(mDBElement.Movie.Sets.Count > 0, mDBElement.Movie.Sets.Item(0).Title, String.Empty)
+                    Dim mSet As String = If(mDBElement.Movie.SetsSpecified, mDBElement.Movie.Sets.Item(0).Title, String.Empty)
                     Dim mSortTitle As String = mDBElement.Movie.SortTitle
                     Dim mTagline As String = mDBElement.Movie.Tagline
                     Dim mTitle As String = mDBElement.Movie.Title
@@ -1052,7 +1058,7 @@ Namespace Kodi
                     If mDBElement.Movie.RuntimeSpecified AndAlso Integer.TryParse(mDBElement.Movie.Runtime, 0) Then
                         mRuntime = CType(mDBElement.Movie.Runtime, Integer) * 60 'API requires runtime in seconds
                     End If
-                    Dim mTop250 As Integer = If(mDBElement.Movie.Top250Specified, CType(mDBElement.Movie.Top250, Integer), 0)
+                    Dim mTop250 As Integer = mDBElement.Movie.Top250
                     Dim mYear As Integer = If(mDBElement.Movie.YearSpecified, CType(mDBElement.Movie.Year, Integer), 0)
 
                     'arrays
@@ -1617,7 +1623,7 @@ Namespace Kodi
 
                         'Sync Episodes
                         If mDBElement.EpisodesSpecified Then
-                            For Each tEpisode As Database.DBElement In mDBElement.Episodes
+                            For Each tEpisode As Database.DBElement In mDBElement.Episodes.Where(Function(f) f.FilenameSpecified)
                                 If tEpisode.TVShow Is Nothing Then Master.DB.AddTVShowInfoToDBElement(tEpisode, mDBElement)
                                 Await Task.Run(Function() UpdateInfo_TVEpisode(tEpisode, blnSendHostNotification, GenericSubEvent, GenericMainEvent))
                             Next
@@ -1723,15 +1729,13 @@ Namespace Kodi
 
             Select Case tDBElement.ContentType
                 Case Enums.ContentType.Movie
-                    If FileUtils.Common.isBDRip(tDBElement.Filename) Then
-                        strLocalPath = Directory.GetParent(Directory.GetParent(Directory.GetParent(tDBElement.Filename).FullName).FullName).FullName
-                    ElseIf FileUtils.Common.isVideoTS(tDBElement.Filename) Then
-                        strLocalPath = Directory.GetParent(Directory.GetParent(tDBElement.Filename).FullName).FullName
+                    If FileUtils.Common.isBDRip(tDBElement.Filename) OrElse FileUtils.Common.isVideoTS(tDBElement.Filename) Then
+                        strLocalPath = FileUtils.Common.GetMainPath(tDBElement.Filename).FullName
                     Else
                         If Path.GetFileNameWithoutExtension(tDBElement.Filename).ToLower = "video_ts" Then
                             strLocalPath = Directory.GetParent(Directory.GetParent(tDBElement.Filename).FullName).FullName
                         Else
-                            strLocalPath = Directory.GetParent(tDBElement.Filename).FullName
+                            strLocalPath = FileUtils.Common.GetMainPath(tDBElement.Filename).FullName
                         End If
                     End If
                 Case Enums.ContentType.TVEpisode, Enums.ContentType.TVSeason, Enums.ContentType.TVShow

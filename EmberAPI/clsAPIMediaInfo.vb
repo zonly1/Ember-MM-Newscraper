@@ -300,7 +300,7 @@ Public Class MediaInfo
                 '  ElseIf StringUtils.IsStacked(Path.GetFileNameWithoutExtension(sPath), True) OrElse FileUtils.Common.isVideoTS(sPath) OrElse FileUtils.Common.isBDRip(sPath) Then
             ElseIf FileUtils.Common.isStacked(sPath) Then
                 Try
-                    Dim oFile As String = FileUtils.Common.RemoveStackingMarkers(sPath, False)
+                    Dim oFile As String = FileUtils.Common.RemoveStackingMarkers(sPath)
                     Dim sFile As New List(Of String)
                     Dim bIsVTS As Boolean = False
 
@@ -320,7 +320,7 @@ Public Class MediaInfo
                         End Try
                     Else
                         Try
-                            sFile.AddRange(Directory.GetFiles(Directory.GetParent(sPath).FullName, String.Concat(Path.GetFileNameWithoutExtension(FileUtils.Common.RemoveStackingMarkers(sPath, True)), "*")))
+                            sFile.AddRange(Directory.GetFiles(Directory.GetParent(sPath).FullName, String.Concat(Path.GetFileNameWithoutExtension(FileUtils.Common.RemoveStackingMarkers(sPath)), "*")))
                         Catch
                         End Try
                     End If
@@ -448,7 +448,7 @@ Public Class MediaInfo
 
         If Not String.IsNullOrEmpty(tCodec) Then
             Dim myconversions As New List(Of AdvancedSettingsComplexSettingsTableItem)
-            myconversions = clsAdvancedSettings.GetComplexSetting("AudioFormatConverts")
+            myconversions = AdvancedSettings.GetComplexSetting("AudioFormatConverts")
             If Not myconversions Is Nothing Then
                 For Each k In myconversions
                     If tCodec.ToLower = k.Name.ToLower Then
@@ -477,7 +477,7 @@ Public Class MediaInfo
 
         If Not String.IsNullOrEmpty(tCodec) Then
             Dim myconversions As New List(Of AdvancedSettingsComplexSettingsTableItem)
-            myconversions = clsAdvancedSettings.GetComplexSetting("VideoFormatConverts")
+            myconversions = AdvancedSettings.GetComplexSetting("VideoFormatConverts")
             If Not myconversions Is Nothing Then
                 For Each k In myconversions
                     If tCodec.ToLower = k.Name.ToLower Then
@@ -565,7 +565,7 @@ Public Class MediaInfo
                 Dim ts As New TimeSpan(0, 0, Convert.ToInt32(Duration))
                 Return String.Format("{0}h {1}min {2}s", ts.Hours, ts.Minutes, ts.Seconds)
             Else
-                Dim sDuration As Match = Regex.Match(Duration, "(([0-9]+)h)?\s?(([0-9]+)mi?n)?\s?(([0-9]+)s)?")
+                Dim sDuration As Match = Regex.Match(Duration, "(([0-9]+)\s?h)?\s?(([0-9]+)\s?mi?n)?\s?(([0-9]+)\s?s)?")
                 Dim sHour As Integer = If(Not String.IsNullOrEmpty(sDuration.Groups(2).Value), (Convert.ToInt32(sDuration.Groups(2).Value)), 0)
                 Dim sMin As Integer = If(Not String.IsNullOrEmpty(sDuration.Groups(4).Value), (Convert.ToInt32(sDuration.Groups(4).Value)), 0)
                 Dim sSec As Integer = If(Not String.IsNullOrEmpty(sDuration.Groups(6).Value), (Convert.ToInt32(sDuration.Groups(6).Value)), 0)
